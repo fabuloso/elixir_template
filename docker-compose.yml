@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+  web:
+    build: .
+    container_name: elixir_template_web
+    init: true
+    ports:
+      - "4090:4000"
+    volumes:
+      - "~/.ssh:/home/app/.ssh"
+      - "~/.gitconfig:/home/app/.gitconfig"
+      - "~/.gitignore:/home/app/.gitignore"
+      - .:$PWD:delegated
+    working_dir: $PWD
+    environment:
+      APP_NAME: elixir_template
+      VERSION: 0.0.0-dev
+    depends_on:
+      - jaeger
+      - postgres
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+    ports:
+      - "16686:16686" # Jaeger Web UI
+
+  postgres:
+    image: public.ecr.aws/bitnami/postgresql:12
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: elixir_template
+      POSTGRES_PASSWORD: elixir_template
